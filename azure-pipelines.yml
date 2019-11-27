@@ -1,0 +1,19 @@
+schedules:
+  - cron: '0 20 * * 0'
+    displayName: Weekly build
+    branches:
+     include:
+       - master
+    always: true
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: Docker@2
+  inputs:
+    containerRegistry: 'Docker Hub - ninckblokje'
+    repository: 'ninckblokje/ftp'
+    command: 'buildAndPush'
+    Dockerfile: '**/Dockerfile'
+    tags: 'latest'
