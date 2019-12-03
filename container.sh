@@ -6,6 +6,8 @@ die_func() {
 }
 trap die_func TERM
 
+touch /etc/vsftpd/chroot_list
+
 userList=`cat /root/users.list`
 
 for userLine in $userList
@@ -14,7 +16,13 @@ do
     userPass=( ${userLine#*:})
 
     echo "Adding user $userName"
-    useradd -m -d /app/ftp/$userName -s /usr/sbin/nologin $userName
+    groupadd "$userName"
+    useradd -m -d "/home/$userName" -s /usr/sbin/nologin -g "$userName" "$userName"
+    
+    mkdir -p "/app/ftp/$userName"
+    chown -R "$userName:$userName" "/app/ftp/$userName"
+
+    echo "$userName" >> /etc/vsftpd/user_list
 
     if [ "$userPass" == "--" ]
     then
@@ -28,4 +36,4 @@ do
 done
 
 echo "Starting vsftpd"
-vsftpd /etc/vsftpd.conf
+vsftpd /etc/vsftpd/vsftpd.conf
